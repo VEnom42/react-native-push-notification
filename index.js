@@ -604,4 +604,8 @@ Notifications.setNotificationCategories = function() {
   return this.callNative('setNotificationCategories', arguments);
 }
 
+Notifications.openNotificationPolicyAccessSettings = function() {
+  return this.callNative('openNotificationPolicyAccessSettings', arguments);
+}
+
 module.exports = Notifications;

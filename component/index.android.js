@@ -170,6 +170,10 @@ NotificationsComponent.prototype.deleteChannel = function(channel_id) {
 	RNPushNotification.deleteChannel(channel_id);
 }
 
+NotificationsComponent.prototype.openNotificationPolicyAccessSettings = function() {
+	RNPushNotification.openNotificationPolicyAccessSettings();
+}
+
 module.exports = {
 	component: new NotificationsComponent()
 };

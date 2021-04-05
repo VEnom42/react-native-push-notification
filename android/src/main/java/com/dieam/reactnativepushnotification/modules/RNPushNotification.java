@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -349,5 +350,22 @@ public class RNPushNotification extends ReactContextBaseJavaModule implements Ac
      */
     public void deleteChannel(String channel_id) {
       mRNPushNotificationHelper.deleteChannel(channel_id);
+    }
+
+    @ReactMethod
+    /**
+     * Opens notification policy access settings
+     */
+    public void openNotificationPolicyAccessSettings() {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        ReactContext reactContext = getReactApplicationContext();
+        Intent intent = new Intent();
+        String packageName = reactContext.getPackageName();
+        intent.setAction("android.settings.NOTIFICATION_POLICY_ACCESS_SETTINGS");
+        intent.putExtra("android.provider.extra.APP_PACKAGE", packageName);
+        intent.putExtra("app_package", packageName);
+        intent.putExtra("app_uid", reactContext.getApplicationInfo().uid);
+        reactContext.startActivityForResult(intent, 1, null);
+      }
     }
 }

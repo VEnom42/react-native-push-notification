@@ -460,6 +460,12 @@ public class RNPushNotificationHelper {
 
             NotificationManager notificationManager = notificationManager();
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+              && bundle.containsKey("canBypassDnd") && bundle.getBoolean("canBypassDnd") && notificationManager.isNotificationPolicyAccessGranted()) {
+              NotificationManager.Policy notificationPolicy = notificationManager.getNotificationPolicy();
+              notificationManager.setNotificationPolicy(new NotificationManager.Policy(notificationPolicy.priorityCategories, NotificationManager.Policy.PRIORITY_SENDERS_ANY, notificationPolicy.priorityMessageSenders));
+            }
+
             long[] vibratePattern = new long[]{0};
 
             if (!bundle.containsKey("vibrate") || bundle.getBoolean("vibrate")) {
@@ -903,7 +909,7 @@ public class RNPushNotificationHelper {
         manager.deleteNotificationChannel(channel_id);
     }
 
-    private boolean checkOrCreateChannel(NotificationManager manager, String channel_id, String channel_name, String channel_description, Uri soundUri, int importance, long[] vibratePattern) {
+    private boolean checkOrCreateChannel(NotificationManager manager, String channel_id, String channel_name, String channel_description, Uri soundUri, int importance, long[] vibratePattern, boolean canBypassDnd) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             return false;
         if (manager == null)
@@ -925,6 +931,7 @@ public class RNPushNotificationHelper {
 
             channel.setDescription(channel_description);
             channel.enableLights(true);
+            channel.setBypassDnd(canBypassDnd);
             channel.enableVibration(vibratePattern != null);
             channel.setVibrationPattern(vibratePattern);
 
@@ -958,13 +965,14 @@ public class RNPushNotificationHelper {
         String soundName = channelInfo.hasKey("soundName") ? channelInfo.getString("soundName") : "default";
         int importance = channelInfo.hasKey("importance") ? channelInfo.getInt("importance") : 4;
         boolean vibrate = channelInfo.hasKey("vibrate") && channelInfo.getBoolean("vibrate");
+        boolean canBypassDnd = channelInfo.hasKey("canBypassDnd") && channelInfo.getBoolean("canBypassDnd");
         long[] vibratePattern = vibrate ? new long[] { 0, DEFAULT_VIBRATION } : null;
 
         NotificationManager manager = notificationManager();
 
         Uri soundUri = playSound ? getSoundUri(soundName) : null;
 
-        return checkOrCreateChannel(manager, channelId, channelName, channelDescription, soundUri, importance, vibratePattern);
+        return checkOrCreateChannel(manager, channelId, channelName, channelDescription, soundUri, importance, vibratePattern, canBypassDnd);
     }
     
     public boolean isApplicationInForeground() {
